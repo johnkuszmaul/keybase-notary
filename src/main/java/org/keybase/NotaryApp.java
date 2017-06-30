@@ -18,20 +18,15 @@ import com.google.common.base.Throwables;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import static java.nio.file.StandardOpenOption.*;
 
 public class NotaryApp extends CatenaApp {
 
-    private static final String ISSUED_STATEMENTS_TXT = "issuedStatements.txt";
     private static final Logger log = LoggerFactory.getLogger(NotaryApp.class);
     private static ECKey chainKey;
     private static CatenaServer server;
     private static final int SECONDS_BETWEEN = 1; // waits only 1 second.
     
     private static int seqno = 0;
-    private static File numberHashPairs = new File(ISSUED_STATEMENTS_TXT);
 
     public static void main(String[] args) throws Exception {
         System.out.println(NotaryApp.class.getClassLoader().getResource("logging.properties"));
@@ -66,7 +61,7 @@ public class NotaryApp extends CatenaApp {
         }
 
         // Server can tell if it needs the chainKey or not, by looking in its wallet
-        server = new org.catena.server.CatenaServer(params, new File(directory), chainKey, null);
+        server = new CatenaServer(params, new File(directory), chainKey, null);
         svc = server;
         //WalletAppKit server = new WalletAppKit(params, new File(directory), "-server");
 
@@ -183,14 +178,6 @@ public class NotaryApp extends CatenaApp {
         }
         if (tx.length() != 128)	{
             log.error("ERROR: Stmt length should be of size 128, but is of size " + stmt.length());
-            System.exit(1);
-        }
-
-        try {
-            Files.write(Paths.get(ISSUED_STATEMENTS_TXT), (seq + " ").getBytes(), APPEND, CREATE);
-            Files.write(Paths.get(ISSUED_STATEMENTS_TXT), (stmt + "\n").getBytes(), APPEND);
-        } catch (IOException e) {
-            log.error("ERROR writing to file {}: {}", ISSUED_STATEMENTS_TXT, Throwables.getStackTraceAsString(e));
             System.exit(1);
         }
 
